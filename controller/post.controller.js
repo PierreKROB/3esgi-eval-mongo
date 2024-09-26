@@ -9,7 +9,11 @@ const Post = require("./../model/post.model");
  */
 exports.getAll = async () => {
     try{
-        //TODO
+        const page = req.query.page || 1;
+        Post.find().sort({date: -1}).limit(10).skip(10 * (page - 1)).exec((err, listPost) => {
+            if(err) throw new Error(err);
+            res.status(200).json(listPost);
+        });
         res.status(200).json(listPost);
     }catch(e){
         res.status(500).json(e.message);
