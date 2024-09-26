@@ -8,18 +8,27 @@ const Comment = require("./../model/comment.model");
  * Si la page est 2 il faut récupérer les post du 11ème au 20ème les plus récents
  * ...
  */
-exports.getAll = async () => {
-    try{
-        //TODO
+exports.getAll = async (req, res) => {
+    try {
+        const page = req.params.page || 1;
+        console.log(page);
+        const limit = 10;
+        const listPost = await Post.find()
+            .sort({ date: -1 })  
+            .limit(limit)        
+            .skip(limit * (page - 1))  
+            .exec();
+
         res.status(200).json(listPost);
-    }catch(e){
-        res.status(500).json(e.message);
+    } catch (e) {
+        res.status(500).json({ message: e.message });
     }
-}
+};
 
 /**
  * Methode pour récupérer un post par son id, et les commentaires associés à ce post
  */
+
 exports.getById = async (req, res) => {
     try{
         //TODO
@@ -27,7 +36,7 @@ exports.getById = async (req, res) => {
         const postWithComment = await Post.findById(req.params.id).populate('Comment');
 
         res.status(200).json(postWithComment);
-    }catch(e){
+    } catch (e) {
         res.status(500).json(e.message);
     }
 }
@@ -40,11 +49,26 @@ exports.getById = async (req, res) => {
  *     userId: <string>
  * }
  */
-exports.create = async () => {
-    try{
+exports.create = async (req, res, next) => {
+    try {
         //TODO
+        if (req.body.message == undefined || req.body.userId == undefined) {
+            return res.status(400).json({ message: 'Merci de renseigner les paramètres nécessaires.' });
+        }
+
+        else {
+            message = req.body.message
+            userId = req.body.userId
+        }
+
+        const post = new Post({
+            message,
+            userId,
+        })
+        await post.save();
+
         res.status(201).json(post);
-    }catch(e){
+    } catch (e) {
         res.status(500).json(e.message);
     }
 }
@@ -57,6 +81,7 @@ exports.create = async () => {
  *     message: <string>
  * }
  */
+
 exports.update = async (req, res) => {
     try{
         //TODO
@@ -67,6 +92,7 @@ exports.update = async (req, res) => {
 
         res.status(201).json({message: "Post mis à jour"});
     }catch(e){
+
         res.status(500).json(e.message);
     }
     
@@ -77,10 +103,12 @@ exports.update = async (req, res) => {
  * @param id l'id du post à supprimer
  */
 exports.delete = async () => {
-    try{
-        //TODO
-        res.status(200).json({message: "Post supprimé"});
-    }catch(e){
+    try {
+        const post = await Post.findByIdAndDelete(req.params.id);
+        if (!post) return res.status(404).json({ message: "Post introuvable" });
+        await Comment.deleteMany({ postId: req.params.id });
+        res.status(200).json({ message: "Post supprimé ainsi que les commentaires associés" });
+    } catch (e) {
         res.status(500).json(e.message);
     }
 }

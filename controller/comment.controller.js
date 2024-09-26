@@ -18,18 +18,17 @@ exports.create = async (req, res, next) => {
         else {
             message = req.body.message
             userId = req.body.userId
-            postId = req.body.userId
+            postId = req.body.postId
 
         }
 
-        const comment = new Comment({
+        const newComment = new Comment({
             message,
             userId,
             postId
         })
-        await Comment.save();
-
-        res.status(201).json(comment);
+        await newComment.save();
+        res.status(201).json(newComment);
     }
 
     catch (e) {
