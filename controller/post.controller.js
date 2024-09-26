@@ -39,9 +39,25 @@ exports.getById = async () => {
  *     userId: <string>
  * }
  */
-exports.create = async () => {
+exports.create = async (req,res,next ) => {
     try{
         //TODO
+        if (req.body.message == undefined || req.body.userId == undefined ) {
+            return res.status(400).json({ message: 'Merci de renseigner les paramètres nécessaires.' });}
+
+        else {
+            message =req.body.message 
+            userId=req.body.userId 
+
+        }
+
+        const Posts =new Post ({  
+
+            message,
+            userId ,
+        })
+        await Posts.save();
+        
         res.status(201).json(post);
     }catch(e){
         res.status(500).json(e.message);
