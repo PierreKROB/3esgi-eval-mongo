@@ -1,4 +1,5 @@
 const Post = require("./../model/post.model");
+const Comment = require("./../model/comment.model");
 
 /**
  * Methode pour récupérer 10 post (les plus récents) par page
@@ -19,9 +20,12 @@ exports.getAll = async () => {
 /**
  * Methode pour récupérer un post par son id, et les commentaires associés à ce post
  */
-exports.getById = async () => {
+exports.getById = async (req, res) => {
     try{
         //TODO
+    
+        const postWithComment = await Post.findById(req.params.id).populate('Comment');
+
         res.status(200).json(postWithComment);
     }catch(e){
         res.status(500).json(e.message);
@@ -53,9 +57,14 @@ exports.create = async () => {
  *     message: <string>
  * }
  */
-exports.update = async () => {
+exports.update = async (req, res) => {
     try{
         //TODO
+        const message_post = req.body.message;
+        const id_post = req.body.userId;
+ 
+        const message = await Post.updateOne({_id: id_post},{$set:{message:message_post, date:Date.now}} );
+
         res.status(201).json({message: "Post mis à jour"});
     }catch(e){
         res.status(500).json(e.message);
