@@ -7,14 +7,17 @@ const Post = require("./../model/post.model");
  * Si la page est 2 il faut récupérer les post du 11ème au 20ème les plus récents
  * ...
  */
-exports.getAll = async () => {
-    try{
-        //TODO
-        res.status(200).json(listPost);
-    }catch(e){
-        res.status(500).json(e.message);
+    exports.getAll = async () => {
+        try{
+            const page = req.query.page || 1;
+            Post.find().sort({date: -1}).limit(10).skip(10 * (page - 1)).exec((err, listPost) => {
+                if(err) throw new Error(err);
+                res.status(200).json(listPost);
+            });
+        }catch(e){
+            res.status(500).json(e.message);
+        }
     }
-}
 
 /**
  * Methode pour récupérer un post par son id, et les commentaires associés à ce post
@@ -68,8 +71,10 @@ exports.update = async () => {
  */
 exports.delete = async () => {
     try{
-        //TODO
-        res.status(200).json({message: "Post supprimé"});
+        const post = await Post.findByIdAndDelete(req.params.id);
+        if(!post) return res.status(404).json({message: "Post introuvable"});
+        await Comment.deleteMany({postId: req.params.id});
+        res.status(200).json({message: "Post supprimé ainsi que les commentaires associés"});
     }catch(e){
         res.status(500).json(e.message);
     }

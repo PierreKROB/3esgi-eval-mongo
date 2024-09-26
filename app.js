@@ -2,6 +2,7 @@ const express = require("express");
 const userRoute = require("./route/user.route");
 const postRoute = require("./route/post.route");
 const commentRoute = require("./route/comment.route");
+const connexion = require("./model/connexion");
 
 const app = express();
 
@@ -17,5 +18,7 @@ app.use((req, res, next) => {
 app.use('/user', userRoute);
 app.use('/post', postRoute);
 app.use('/comment', commentRoute);
+
+connexion.connect();
 
 module.exports = app;
